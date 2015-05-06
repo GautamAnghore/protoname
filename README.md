@@ -93,7 +93,7 @@ Implementing a new Manet Unicast Routing Protocol in NS2
 
 ## Packet Types
   
- `protoname/protoname_pkt.h`
+`protoname/protoname_pkt.h`
 
  + define a structure which represents the pkt structure.
  + raw_attributes are used according to ns2 specification
@@ -109,7 +109,45 @@ Implementing a new Manet Unicast Routing Protocol in NS2
 
  + Now bind our packet header to Tcl interface.
  
-  `protoname/protoname.cc`
+ `protoname/protoname.cc`
 
  + Define the static `ProtonameHeaderClass` class which inherits the `PacketHeaderClass`.
  + Define constructor passing values to `PacketHeaderClass` constructor and binding the offset of our packet.
+
+## The Routing Agent
+
+`protoname/protoname.h`
+
+ + Define a new `Protoname` class having attributes and functions which are needed for protocol to do its job.
+
+ + Header files included :
+   - `protoname/protoname_pkt.h` : Defines our packet header.
+   - `common/agent.h` : Defines Agent base class.
+   - `common/packet.h` : Defines Packet class.
+   - `common/timer-handler.h` : Defines TimerHandler base class. We will use it to create our custom timers.
+   - `trace/trace.h` : Defines Trace class, used for writing simulation results out to a trace file.
+   - `tools/random.h` : Defines Random class, useful for generating pseudo-random numbers. We will use it soon.
+   - `classifier/classifier-port.h` : Defines PortClassifier class, used for passing packets up to upper layers.
+
+ + Macro for current time using `Schedule` class
+ + Macro for random numbers b/w 0-0.5 for non synchronization of neighbour nodes
+ + Forward declaration of `Protoname` agent class
+ + A `Protoname_PktTimer` class defination inherits `TimerHandler` class, reference to routing agent who creats it. Used 'as a callback' to tell agent when to send the control packet and to schedule next one. `Protoname` class have this class as a friend to access the callback.
+ + `Protoname` Agent class defination
+   - inherits `Agent` class
+   - its own address
+   - internal state
+   - routing table
+   - accessible variable from TCL
+   - counter for assigning sequence number
+   - `PortClassifier` object - [ nodes structure - chapter5[2]] node consists of address classifier and port classifier. Address classifier to guide the incoming packets to suitable link, pass them to port classifier. Port classifier passes these to appropriate upper layer agent. [ detailed architecture of mobile node - chapter16[2] ]
+   - `Trace` class object : we use it to write the content of routing table to logs whenever user asks for it using Tcl
+   - a custom timer declaration
+   - function to forward data
+   - function to be called on recieving a packet
+   - function for sending packet
+   - function to schedule our custom timer expiration
+   - constructor needs identifier used as routing agent's address
+   - `recv()` to call whenever agent recieves a packet either from upper layer agent like UDP or TCP or from some other node
+   - `command()` invoked from Tcl [ chapter 3[2] ]
+
