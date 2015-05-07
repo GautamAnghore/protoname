@@ -26,3 +26,12 @@ public:
 		return (new Protoname((nsaddr_t)Address::instance().str2addr(argv[4])));
 	}
 }class_rtProtoProtoname;
+
+/*
+	defination of : protoname.h > Protoname_PktTimer > expire 
+*/
+void Protoname_PktTimer::expire(Event* e) {
+	agent_->send_protoname_pkt();
+	agent_->reset_protoname_pkt_timer();
+}
+
