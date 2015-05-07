@@ -181,3 +181,37 @@ Implementing a new Manet Unicast Routing Protocol in NS2
  __Using the `accessible_var_` from Tcl interface__
  <br/>
  `Agent/Protoname set accessible_var_ true`
+
+###command() method defination
+`protoname/protoname.cc`
+
+ + `command()` function is inherited from `Agent` class.
+ + this function is invoked when we pass the command like
+   <br/>`$ns_ at 15.0 "[$node_ agent 255] print_rtable"`
+   <br/>passing 255 as an arguement because this is the port to which routing agent is attached to.
+ + [ chapter 3[2] ] specification of "cmd"
+  <br/>as per the specifications 
+   - `argv[0]` name of method being invoked
+   - `argv[1]` requested operation
+   - `argv[2..argc-1]` additional arguements
+ + code the operations which are mendatory plus some methods which you want to be accessible from TCL interface.
+ + we will have different cases for each operations
+ + each case must end with `TCL_OK` (everything is ok) or `TCL_ERROR` (error occured)
+ + `start` : mendatory operation, configure the agent to start its execution, define all actions that are required by the routing agent to perform in order to begin its operation.
+ + `port-dmux` : mendatory operation, 
+ 	<br/>[ chapter 3 [2] ] NS stores a reference of every compiled object (c++ object) in hash table for fast access to each of them given its name. Example usage -
+ 	<br/>`dmux_ = (PortClassifier*)TclObject::lookup(argv[2]);`
+ 	<br/>`lookup` is the function of `TclObject` class to find the reference and as we are looking for `Portclassifier` class object, we need type casting.
+ + `tracetarget` ( can also be called as `log-target`) : mendatory operation, obtains a `Trace` object given its name. `logtarget_ = (Trace*)TclObject::lookup(argv[2]);`
+  	
+ + some other operations, for example
+   - `print_rtable` : prints the routing table to trace file. To understand `Trace` class, view `trace/trace.h` header file. `buffer()` and `dump()` functions are implemented in `BaseTrace` class.<br/>
+    `buffer()` - to get the variable where the output is buffered<br/>
+    `dump()` - to flush the buffer to the output file<br/>
+    calls the `print()` function of the routing table.
+
+ + every operation returns either `TCL_OK` or `TCL_ERROR`
+ + finally if the command did not match any description, we pass it to base class
+   <br/>`return Agent::command(argc, argv);`
+
+   
