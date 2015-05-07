@@ -34,7 +34,7 @@ class Protoname : public Agent {
 	nsaddr_t		 ra_addr_;		// agent's address
 	protoname_state  state_;		// agent's current state
 	protoname_rtable rtable_;		// agent's routing table
-	int 			 accesible_var_;// variable to be accessed by tcl script
+	int 			 accessible_var_;// variable to be accessed by tcl script
 	u_int8_t		 seq_num;		// sequence number to be attached with each packet
 
 protected:
@@ -45,7 +45,7 @@ protected:
 
 	inline nsaddr_t& ra_addr() { return ra_addr_; }
 	inline protoname_state& state() { return state_; }
-	inline int& accesible_var() { return accesible_var_; }
+	inline int& accessible_var() { return accessible_var_; }
 
 	void forward_data(Packet*);			// for fwding packets
 	void recv_protoname_pkt(Packet*);	// to be called when packet recieved

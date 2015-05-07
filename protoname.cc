@@ -35,3 +35,13 @@ void Protoname_PktTimer::expire(Event* e) {
 	agent_->reset_protoname_pkt_timer();
 }
 
+/*
+	defination of : protoname.h > Protoname > functions
+*/
+
+// constructor
+
+Protoname::Protoname(nsaddr_t id) : Agent(PT_PROTONAME), pkt_timer_(this) {
+	bind_bool("accessible_var_", &accessible_var_);
+	ra_addr_ = id;
+}

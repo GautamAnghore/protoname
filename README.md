@@ -157,9 +157,9 @@ Implementing a new Manet Unicast Routing Protocol in NS2
  + inherits `TclClass`
  + constructor simply calls `TclClass`'s constructor with arguement "Agent/Protoname"
  + function `create()`, returns a `TclObject*`, takes arguements argc and argv, argc should be 5.
- + argv of the form "<object’s name> <$self> <$class> <$proc> <user argument>"[ for more information chapter 3[2]]. In this case, "<object’s name> <$self> Agent/Protoname create-shadow <id>". <id> is converted to nsaddr_t and then passed in the constructor of `Protoname` agent class's new object which is returned also.
+ + argv of the form `<object’s name> <$self> <$class> <$proc> <user argument>` [ for more information chapter 3[2]]. In this case, `<object’s name> <$self> Agent/Protoname create-shadow <id>`. `<id>` is converted to nsaddr_t and then passed in the constructor of `Protoname` agent class's new object which is returned also.
 
-####Timer
+###Timer
 `protoname/protoname.cc`
  + code the `expire()` method
  + two tasks:
@@ -167,4 +167,17 @@ Implementing a new Manet Unicast Routing Protocol in NS2
    2. reschedule the timer itself
 
  + more on timers [ chapter 11 [2]]
- 
+
+##The Routing Agent function definations
+
+###Constructor
+`protoname/protoname.cc`
+
+ + call constructor for `Agent` super class. `Agent(PT_PROTONAME)` where `PT_PROTONAME` will be defined later.(where will it be defined?). `PT_PROTONAME` is used to identify the control packets sent and recieved by this agent.
+ + call the constructor for `Protoname_PktTimer` object in our class(`pkt_timer_`).
+ + `bind()` the `accessible_var_` as a boolean attribute to be accessed by tcl interface. For boolean binding `bind_bool()` and for integer binding `bind()`.
+ + save the address of agent
+
+ __Using the `accessible_var_` from Tcl interface__
+ <br/>
+ `Agent/Protoname set accessible_var_ true`
