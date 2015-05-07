@@ -107,8 +107,8 @@ Implementing a new Manet Unicast Routing Protocol in NS2
  + __Packet__ class stores all the defined packets as an array of unsigned chars where packets' fields are saved. To access our defined packet, we need to define in our header, an offset property which will find where our packet is.
  + __question__ : there is a member function `access` which is defined so that it can return a `hdr_protoname_pkt` when passed a `Packet`. _HOW? the function is calling itself with passing offset_.
 
+####TCL Hook
  + Now bind our packet header to Tcl interface.
- 
  `protoname/protoname.cc`
 
  + Define the static `ProtonameHeaderClass` class which inherits the `PacketHeaderClass`.
@@ -150,4 +150,13 @@ Implementing a new Manet Unicast Routing Protocol in NS2
    - constructor needs identifier used as routing agent's address
    - `recv()` to call whenever agent recieves a packet either from upper layer agent like UDP or TCP or from some other node
    - `command()` invoked from Tcl [ chapter 3[2] ]
+
+####TCL Hook
+`protoname/protoname.cc`
+ + Bind our agent to Tcl so that it can be instantiated from Tcl
+ + inherits `TclClass`
+ + constructor simply calls `TclClass`'s constructor with arguement "Agent/Protoname"
+ + function `create()`, returns a `TclObject*`, takes arguements argc and argv, argc should be 5.
+ + argv of the form "<object’s name> <$self> <$class> <$proc> <user argument>"[ for more information chapter 3[2]]. In this case, "<object’s name> <$self> Agent/Protoname create-shadow <id>". <id> is converted to nsaddr_t and then passed in the constructor of `Protoname` agent class's new object which is returned also.
+
 
