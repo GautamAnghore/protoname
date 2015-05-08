@@ -97,3 +97,49 @@ int Protoname::command(int argc, const char*const* argv) {
 	// hand it over to base class
 	return Agent::command(argc, argv);
 }
+
+// recv function
+void Protoname::recv(Packet* p, Handler* h) {
+	// STEP 1 : get the headers
+	// ch = common header
+	// HDR_CMN(p) : macro defined in common/packet.h to get the common header
+	struct hdr_cmn* ch = HDR_CMN(p);
+	// ih = ip header
+	// ip = internet protocol
+	// HDR_IP(p) : macro defined in ip.h to get the ip header
+	struct hdr_ip* ih = HDR_IP(p);
+
+	// STEP 2 : check sender's address
+	//if ip header -> sender's address is same as current nodes address
+	//means either there is a loop in the network so drop
+	//or the packet is generated at this node (by upper layers), so add ip header
+	if(ih->saddr() == ra_addr()) {
+		//network loop condition
+		//if packet is already forwarded, means loop
+		if(ch->num_forwards() > 0) {
+			drop(p, DROP_RTR_ROUTE_LOOP);
+			return;
+		}
+		//else packet is generated here, add IP header
+		else if(ch->num_forwards() == 0) {
+			ch->size() += IP_HDR_LEN;
+		}
+	}
+
+	// STEP 3 : check packet type
+	// if packet is protoname's packet, process it
+	// else reduce ttl, check zero, forward it
+	if(ch->ptype() == PT_PROTONAME) {
+		//process the packet data
+		recv_protoname_pkt(p);
+	}
+	else {
+		ih->ttl_--;
+		if(ih->ttl_ == 0) {
+			drop(p, DROP_RTR_TTL);
+			return;
+		}
+		forward_data(p);
+	}
+
+}

@@ -214,4 +214,30 @@ Implementing a new Manet Unicast Routing Protocol in NS2
  + finally if the command did not match any description, we pass it to base class
    <br/>`return Agent::command(argc, argv);`
 
-   
+###recv() method definition
+`protoname/protoname.cc`
+
+ + Invoked whenever routing agent recieves a packet (from other node or upper layer agent). Even when the packet is generated at this node, recv() is called as the packet is recieved by the agent from the upper layer agent.
+ 
+ + Every `Packet` has a common header `hdr_cmn` defined in `common/packet.h`. To access this header there is a macro defined.<br/>
+ `struct hdr_cmn* ch = HDR_CMN(p);` where p is `Packet*`.
+ + Same is with the IP header. To access the IP header `HDR_IP` macro defined in `ip.h` might be used.
+ <br/> `struct hdr_ip* ih = HDR_IP(p);`
+ 
+ + first of all, check for a loop. If the packet recieved by agent is sent by itself, drop the packet as there is a loop in the network.
+ + then, if the packet is generated within the node (by upper layer agents), add the overhead that routing protocol is adding(in bytes). In this case, it is IP, so add the IP's header size to packet size.<br/>
+ `ch->size() += IP_HDR_LEN;`
+ 
+ + Data packet can be of various types. It can be data packet or control packet. Control packet is used by the routing protocol to figure out routing meta data. Control packet can be of `PT_PROTONAME` type which corrosponds to our protocol or any other protocol's control packet. Data Packet contains the actual data.
+ 
+ + Check the type of packet. 
+   <br/>__If__ it is `PT_PROTONAME`, it is protoname packet and we need to process it by calling the function
+   <br/>`recv_protoname_pkt(p);`
+   <br/>__Else__ decrease the ttl by one, check if it is zero. _If_ yes drop the packet with 
+   `drop(p, DROP_RTR_TTL);`, _else_, forward the packet with `forward_data()` function.
+ 
+ + `recv_protoname_pkt(p)` is called when the packet is protoname's packet. This function should perform the actual task of protocol, like updating the routing table or so.
+ 
+ + `forward_data(p)` is called if the packet is not of protoname type. This function should check if the packet is to be forwarded to other node, or the packet is destined to this node. If packet is destined to this node, deliver the packet to upper layer agents.
+
+ + __`drop(p, const)`__ is used to drop the packet. `drop(p, const)`, p is Packet* and const is a constant giving reason to discard the packet. `trace/cmu-trace.h` have the defination of constants.
