@@ -241,3 +241,15 @@ Implementing a new Manet Unicast Routing Protocol in NS2
  + `forward_data(p)` is called if the packet is not of protoname type. This function should check if the packet is to be forwarded to other node, or the packet is destined to this node. If packet is destined to this node, deliver the packet to upper layer agents.
 
  + __`drop(p, const)`__ is used to drop the packet. `drop(p, const)`, p is Packet* and const is a constant giving reason to discard the packet. `trace/cmu-trace.h` have the defination of constants.
+
+###recv\_protoname\_pkt() method definition
+`protoname/protoname.cc`
+
+ + invoked by `recv()` when a protoname packet is recieved
+ + get the ip header and the Protoname's header as defined in protoname_pkt.h
+   <br/>`struct hdr_protoname_pkt* ph = HDR_PROTONAME_PKT(p);`
+ + __note :__ All routing messages are sent to and from port number 255. This port is reserved to attach the routing agent.
+ + `RT_PORT` as defined in `common/packet.h` is the routing port with value 255.
+ + check the source and destination port to be `RT_PORT`
+ + process the packet according to protocol specifications
+ + release the resources `Packet::free(p)` 

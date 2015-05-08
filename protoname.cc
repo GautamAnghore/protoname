@@ -46,7 +46,7 @@ Protoname::Protoname(nsaddr_t id) : Agent(PT_PROTONAME), pkt_timer_(this) {
 	ra_addr_ = id;
 }
 
-// command function
+// pubilc : command function
 
 int Protoname::command(int argc, const char*const* argv) {
 	
@@ -98,7 +98,7 @@ int Protoname::command(int argc, const char*const* argv) {
 	return Agent::command(argc, argv);
 }
 
-// recv function
+// public : recv function
 void Protoname::recv(Packet* p, Handler* h) {
 	// STEP 1 : get the headers
 	// ch = common header
@@ -142,4 +142,21 @@ void Protoname::recv(Packet* p, Handler* h) {
 		forward_data(p);
 	}
 
+}
+
+// protected : recv_protoname_pkt(Packet* p)
+void Protoname::recv_protoname_pkt(Packet* p) {
+	struct hdr_ip* ih = HDR_IP(p);
+	// use of our macro defination
+	struct hdr_protoname_pkt* ph = HDR_PROTONAME_PKT(p);
+
+	//check the source and destination ports
+	//they must be RT_PORT for routing packets
+	assert(ih->sport() == RT_PORT);
+	assert(ih->dport() == RT_PORT);
+
+	// the main protocol logic
+
+	// free the resources
+	Packet::free(p);
 }
