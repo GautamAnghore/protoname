@@ -160,3 +160,43 @@ void Protoname::recv_protoname_pkt(Packet* p) {
 	// free the resources
 	Packet::free(p);
 }
+
+// protected : send_protoname_pkt()
+void Protoname::send_protoname_pkt() {
+
+	//create a packet
+	Packet* p = allocpkt();
+
+	//get the headers
+	struct hdr_cmn* ch = HDR_CMN(p);
+	struct hdr_ip* ih = HDR_IP(p);
+	struct hdr_protoname_pkt* ph = HDR_PROTONAME_PKT(p);
+
+	//set the header values
+	ph->pkt_src() = ra_addr();
+	ph->pkt_len() = 7;
+	ph->pkt_seq_num() = seq_num_++;
+
+	//common header values
+	ch->ptype() = PT_PROTONAME;
+	ch->direction() = hdr_cmn::DOWN;
+	ch->size() = IP_HDR_LEN + ph->pkt_len();
+	ch->error() = 0;
+	ch->next_hop() = IP_BROADCAST;
+	//address type - NS_AF_INET for internet protocol
+	ch->addr_type() = NS_AF_INET;
+
+	//ip header values
+	// source and destination address
+	ih->saddr() = ra_addr();
+	ih->daddr() = IP_BROADCAST;
+	//source and destination ports are RT_PORT for routing data transfers
+	ih->sport() = RT_PORT;
+	ih->dport() = RT_PORT;
+	//default ttl for ip
+	ih->ttl() = IP_DEF_TTL;
+
+	//schedule the packet to be sent as packet is essentially an event
+	//target_ handles the event, p is the packet to be sent, JITTER introduced to avoid sync
+	Schedule::instance().schedule(target_, p, JITTER);
+}

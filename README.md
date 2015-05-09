@@ -21,7 +21,7 @@ Implementing a new Manet Unicast Routing Protocol in NS2
 
 # c++ reference
 
-## `ifdef` and `ifndef`
+### `ifdef` and `ifndef`
 
  + __ifdef__
 
@@ -45,6 +45,24 @@ Implementing a new Manet Unicast Routing Protocol in NS2
   ```
 
   Same as `ifdef`. The content is included only if MACRO is not defined. Used to include the content only once.
+
+### Function on left hand side of assignment operator
+`setref() = 10`
+	
+  + Assignment operator need _lvalue_ on left hand side of assignment operator
+  + In C++, function call is an _lvalue_ if the function returns a variable by reference or by pointer
+
+```c
+int ref=0;
+int& setRef() {
+    return ref;
+}
+
+int main() {
+   setRef() = 11;
+   cout<<ref;
+}
+```
 
 
 # protname how-to
@@ -252,4 +270,26 @@ Implementing a new Manet Unicast Routing Protocol in NS2
  + `RT_PORT` as defined in `common/packet.h` is the routing port with value 255.
  + check the source and destination port to be `RT_PORT`
  + process the packet according to protocol specifications
- + release the resources `Packet::free(p)` 
+ + release the resources `Packet::free(p)`
+
+###send\_protoname\_pkt() method definition
+`protoname/protoname.c`
+
+ + called by custom timer function ( Protoname_PktTimer > expire() ) when it expires
+ + allocate the packet using `allocpkt()`, this function is defined for all agents
+ + get the common, ip and protoname's packet headers
+ + then fill these headers with values we want to.
+ + according to packet structure of protocol, fill the required values
+ + common header
+   - set the packet type to protoname
+   - set the direction `hdr_cmn::DOWN` for sending
+   - size of packet in bytes (nothing to do with the size of `hdr_protoname_pkt` structure, used by ns2 to calculate ns2 propagation delay)
+   - error tolarable or not
+   - next hop address
+   - address type (can be `NS_AF_NONE`, `NS_AF_ILINK` or `NS_AF_INET` (see common/packet.h), `NS_AF_INET` -> for internet protocol).
+ + ip header
+   - time to live -> `IP_DEF_TTL` (default defined in common/ip.h)
+ + Packets are events(chapter 12[2]) so they needs to be scheduled
+ + _In fact, sending a packet is equivalent to schedule it at a certain time._
+ + Packet class inherits from `Connector` class, which has a member of `TclObject` class called `target_`. Event will be handled by this object. It is passed to the `schedule()` function.
+    
