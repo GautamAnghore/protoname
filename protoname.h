@@ -33,7 +33,7 @@ class Protoname : public Agent {
 
 	nsaddr_t		 ra_addr_;		// agent's address
 	protoname_state  state_;		// agent's current state
-	protoname_rtable rtable_;		// agent's routing table
+	Protoname_rtable rtable_;		// agent's routing table
 	int 			 accessible_var_;// variable to be accessed by tcl script
 	u_int8_t		 seq_num;		// sequence number to be attached with each packet
 

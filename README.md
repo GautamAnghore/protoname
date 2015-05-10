@@ -320,3 +320,16 @@ int main() {
  + if we recieve `IP_BROADCAST`, there is no path for destination and we drop the packet with a debug message
 
 
+##Routing Table
+
+ + We can implement the routing table as any data structure (like hash table)
+ + We can implement it with different class or within the Router Agent class.
+ + For each entry in routing table, there might be a of information to store like destination address, next_hop, cost, etc. etc.
+ + Here, we are storing only destination address and the corrosponding next hop in the routing table using Hash Table.
+ <br/>`typedef std::map<nsaddr_t, nsaddr_t> rtable_t;`
+
+###Routing Table Class
+
+ + define the routing table according to your need
+ + any data structure can be used
+ + define functions you need like add\_entry, rm\_entry, clear or print
