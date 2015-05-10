@@ -298,4 +298,25 @@ int main() {
  + invoked by `Protoname_PktTimer::expire()`
  + we can schedule `pkt_timer_` to expire after some time
 
+###forward\_data()
+
+ + to deal with packets other than `PT_PROTONAME` type
+ + decides whether the packet has to be given to upper layer agents or to be forwarded to other nodes
+ + when destination address is the self node address or `IP_BROADCAST`, packet is destined for this node
+ + to accept the incoming packet, `dmux_`(object of PortClassifier class) is used
+ + If destination address is not `ra_addr()`, we forward the packet
+ + to forward, set the common header fields
    
+   - _not clear? -_ If the packet is a broadcast one, set the next hop field accordingly. s: If the packet is broadcast type, we simply recieve the packet. What is the need to broadcast it again.
+   <br/>_possible reason:_ if the direction of packet is `hdr::UP`, it means it was sent from somewhere else and it should be accepted and given to upper layer agents. If direction is `hdr::DOWN`, we have to do the broadcast.
+
+   - If the packet is destined to somewhere else, we need to look for that next node to send the packet to in order to send the packet to destination. We will look into our routing table and check if there exists any path to that destination, and what is the next node in the path. So we use the lookup method of rtable.
+   <br/>`nsaddr_t next_hop = rtable_.lookup(ih->daddr());`
+   <br/>`rtable_.lookup()` function performs a lookup and returns an address for next_hop or if there is no path leading to destination node, it will return `IP_BROADCAST`.
+ 
+ + if we recieve the next\_hop address, we will set the common header's next\_hop field
+ + to send the packet with this header, we need to schedule the Packet event(as Packet is an event in NS) after time 0.0
+ <br/>`Scheduler::instance().schedule(target_, p, 0.0);`
+ + if we recieve `IP_BROADCAST`, there is no path for destination and we drop the packet with a debug message
+
+

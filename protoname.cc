@@ -205,3 +205,51 @@ void Protoname::reset_protoname_pkt_timer() {
 	pkt_timer_.resched((double)5.0);
 }
 
+void Protoname::forward_data(Packet* p) {
+
+	struct hdr_cmn* ch = HDR_CMN(p);
+	struct hdr_ip* ih = HDR_IP(p);
+
+	// if direction is up, packet was sent from some other node
+	// and check the destination address
+	// as IP_BROADCAST is a constant integer defined so ih->daddr() has to be type casted
+	// ra_addr() and ih->daddr() both returns nsaddr_t type data
+	if(ch->direction() == hdr::UP && ((u_int32_t)ih->daddr() == IP_BROADCAST || ih->daddr() == ra_addr())) {
+		// packet is destined for here
+		// recieve the packet and hand it over to upper layer agents
+		// dmux_ : PortClassifier type object is used for recieving
+		dmux_->recv(p, 0.0);
+		return;
+	}
+	else {
+		// packet is not destined for here so forward to other node if possible
+
+		ch->direction() = hdr::DOWN;
+		ch->addr_type() = NS_AF_INET;
+
+		// if broadcast packet
+		if((u_int32_t)ih->daddr() == IP_BROADCAST) {
+			ch->next_hop() = IP_BROADCAST;
+		}
+		// not broadcast message, so pkt have to be fwded to next hop in order to reach destination
+		else {
+			// look for the next_hop for destination in routing table
+			nsaddr_t next_hop = rtable_.lookup(ih->daddr());
+
+			// if no route found, drop the packet
+			// lookup returns IP_BROADCAST for no route
+			if(next_hop == IP_BROADCAST) {
+				// print debug message
+				debug("%f: Agent %d can not forward a packet destined to %d\n", CURRENT_TIME, ra_addr(), ih->daddr());
+				//drop the packet
+				drop(p, DROP_RTR_NO_ROUTE);
+				return;
+			}
+			// route found
+			else {
+				ch->next_hop() = next_hop;
+			}
+			Scheduler::instance().schedule(target_, p, 0.0);
+		}
+	}
+}
