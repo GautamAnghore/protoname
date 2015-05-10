@@ -200,3 +200,8 @@ void Protoname::send_protoname_pkt() {
 	//target_ handles the event, p is the packet to be sent, JITTER introduced to avoid sync
 	Schedule::instance().schedule(target_, p, JITTER);
 }
+
+void Protoname::reset_protoname_pkt_timer() {
+	pkt_timer_.resched((double)5.0);
+}
+

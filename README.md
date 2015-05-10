@@ -292,4 +292,10 @@ int main() {
  + Packets are events(chapter 12[2]) so they needs to be scheduled
  + _In fact, sending a packet is equivalent to schedule it at a certain time._
  + Packet class inherits from `Connector` class, which has a member of `TclObject` class called `target_`. Event will be handled by this object. It is passed to the `schedule()` function.
-    
+
+###reset\_protoname\_pkt\_timer()
+
+ + invoked by `Protoname_PktTimer::expire()`
+ + we can schedule `pkt_timer_` to expire after some time
+
+   
